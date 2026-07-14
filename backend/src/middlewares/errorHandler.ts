@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
+import multer from 'multer';
 import { ZodError } from 'zod';
 import { isProduction } from '../config/env';
 import { AppError } from '../utils/AppError';
@@ -25,6 +26,18 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
       res.status(404).json({ status: 'error', message: 'Registro no encontrado' });
       return;
     }
+    if (err.code === 'P2003') {
+      res.status(409).json({
+        status: 'error',
+        message: 'No se puede completar la operación porque el registro está siendo referenciado por otros datos',
+      });
+      return;
+    }
+  }
+
+  if (err instanceof multer.MulterError) {
+    res.status(400).json({ status: 'error', message: `Error al subir archivo: ${err.message}` });
+    return;
   }
 
   if (err instanceof AppError) {

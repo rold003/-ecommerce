@@ -27,6 +27,20 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
   }
 }
 
+// Igual que authenticate, pero no falla si no hay token: solo adjunta req.user si es válido.
+// Para rutas públicas cuyo comportamiento cambia levemente si el visitante es admin.
+export function optionalAuthenticate(req: Request, _res: Response, next: NextFunction): void {
+  const token = req.cookies?.accessToken as string | undefined;
+  if (token) {
+    try {
+      req.user = verifyAccessToken(token);
+    } catch {
+      // Token inválido en ruta pública: se ignora, se continúa como visitante anónimo.
+    }
+  }
+  next();
+}
+
 export function authorize(...roles: Rol[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user || !roles.includes(req.user.rol)) {
