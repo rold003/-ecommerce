@@ -31,24 +31,24 @@ async function main(): Promise<void> {
     },
   });
 
-  await prisma.direccion.upsert({
-    where: { id: 'seed-direccion-cliente' },
-    update: {},
-    create: {
-      id: 'seed-direccion-cliente',
-      usuarioId: cliente.id,
-      etiqueta: 'Casa',
-      destinatario: 'Cliente Demo',
-      telefono: '0999999999',
-      calle: 'Av. Siempre Viva',
-      numero: '123',
-      ciudad: 'Quito',
-      provincia: 'Pichincha',
-      codigoPostal: '170101',
-      pais: 'Ecuador',
-      predeterminada: true,
-    },
-  });
+  const direccionExistente = await prisma.direccion.findFirst({ where: { usuarioId: cliente.id } });
+  if (!direccionExistente) {
+    await prisma.direccion.create({
+      data: {
+        usuarioId: cliente.id,
+        etiqueta: 'Casa',
+        destinatario: 'Cliente Demo',
+        telefono: '0999999999',
+        calle: 'Av. Siempre Viva',
+        numero: '123',
+        ciudad: 'Quito',
+        provincia: 'Pichincha',
+        codigoPostal: '170101',
+        pais: 'Ecuador',
+        predeterminada: true,
+      },
+    });
+  }
 
   const categoriasData = [
     { nombre: 'Tecnología', slug: 'tecnologia' },
@@ -225,18 +225,18 @@ async function main(): Promise<void> {
       },
     });
 
-    await prisma.imagen.upsert({
-      where: { id: `seed-img-${p.slug}` },
-      update: {},
-      create: {
-        id: `seed-img-${p.slug}`,
-        productoId: producto.id,
-        url: `https://picsum.photos/seed/${p.seedImg}/800/800`,
-        altText: p.nombre,
-        orden: 0,
-        esPrincipal: true,
-      },
-    });
+    const imagenExistente = await prisma.imagen.findFirst({ where: { productoId: producto.id } });
+    if (!imagenExistente) {
+      await prisma.imagen.create({
+        data: {
+          productoId: producto.id,
+          url: `https://picsum.photos/seed/${p.seedImg}/800/800`,
+          altText: p.nombre,
+          orden: 0,
+          esPrincipal: true,
+        },
+      });
+    }
   }
 
   await prisma.cupon.upsert({
