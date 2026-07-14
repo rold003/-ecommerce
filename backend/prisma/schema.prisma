@@ -1,0 +1,11 @@
+// Schema de Prisma. El modelado completo de tablas (Usuario, Producto, Pedido, etc.)
+// se agrega en el siguiente módulo ("Backend: schema Prisma completo").
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
