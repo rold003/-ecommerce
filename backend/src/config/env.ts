@@ -27,6 +27,10 @@ const envSchema = z.object({
 
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000),
   RATE_LIMIT_MAX: z.coerce.number().default(100),
+
+  TAX_RATE: z.coerce.number().min(0).max(1).default(0.15),
+  SHIPPING_FLAT_RATE: z.coerce.number().nonnegative().default(5),
+  FREE_SHIPPING_THRESHOLD: z.coerce.number().nonnegative().default(50),
 });
 
 const parsed = envSchema.safeParse(process.env);
