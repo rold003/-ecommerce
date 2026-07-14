@@ -1,0 +1,16 @@
+{
+  "name": "ecommerce",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Monorepo raiz: orquesta backend y frontend como proyectos npm independientes.",
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "backend:install": "npm --prefix backend install",
+    "backend:dev": "npm --prefix backend run dev",
+    "frontend:install": "npm --prefix frontend install",
+    "frontend:dev": "npm --prefix frontend run dev",
+    "install:all": "npm run backend:install && npm run frontend:install"
+  }
+}
