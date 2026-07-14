@@ -4,8 +4,10 @@ import cors from 'cors';
 import express, { Application } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import swaggerUi from 'swagger-ui-express';
 import { corsOptions } from './config/cors';
 import { isProduction } from './config/env';
+import { openApiDocument } from './docs/openapi';
 import { errorHandler } from './middlewares/errorHandler';
 import { notFound } from './middlewares/notFound';
 import { apiLimiter } from './middlewares/rateLimiter';
@@ -17,6 +19,13 @@ export function createApp(): Application {
   // Necesario detrás de un proxy/balanceador (Render, etc.) para que rate-limit
   // y cookies "secure" identifiquen correctamente el protocolo/IP real.
   app.set('trust proxy', 1);
+
+  // Swagger UI se sirve de sus propios assets con <script> inline para inicializarse,
+  // lo que violaría el CSP estricto de Helmet (script-src 'self', sin unsafe-inline).
+  // Se monta antes de app.use(helmet()) para que esta ruta nunca pase por ese CSP;
+  // el resto de la API sí queda protegida por Helmet normalmente.
+  app.get('/api-docs.json', (_req, res) => res.json(openApiDocument));
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
   app.use(helmet());
   app.use(cors(corsOptions));
