@@ -1,8 +1,10 @@
 import { Router } from 'express';
+import adminRoutes from './admin.routes';
 import authRoutes from './auth.routes';
 import brandRoutes from './brand.routes';
 import cartRoutes from './cart.routes';
 import categoryRoutes from './category.routes';
+import couponRoutes from './coupon.routes';
 import favoriteRoutes from './favorite.routes';
 import orderRoutes from './order.routes';
 import productRoutes from './product.routes';
@@ -27,8 +29,7 @@ router.use('/cart', cartRoutes);
 router.use('/orders', orderRoutes);
 router.use('/reviews', reviewRouter);
 router.use('/favorites', favoriteRoutes);
-
-// Los routers de los siguientes módulos (admin/dashboard...) se montarán aquí a medida
-// que se desarrollen: router.use('/admin', adminRoutes);
+router.use('/coupons', couponRoutes);
+router.use('/admin', adminRoutes);
 
 export default router;
