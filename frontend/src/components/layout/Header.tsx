@@ -1,8 +1,11 @@
 import clsx from 'clsx';
-import { Heart, Menu, Moon, Search, ShoppingBag, Sun, User, X } from 'lucide-react';
-import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Heart, LogOut, Menu, Moon, Package, Search, Settings, ShoppingBag, Sun, User, X } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 const navLinks = [
   { to: '/', label: 'Inicio' },
@@ -12,9 +15,18 @@ const navLinks = [
 
 export function Header() {
   const { theme, toggleTheme } = useTheme();
+  const { usuario, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useClickOutside(menuRef, () => setMenuOpen(false));
   // TODO: se reemplaza por el conteo real del CartContext en el módulo de carrito.
   const cartCount = 0;
+
+  const handleLogout = async (): Promise<void> => {
+    setMenuOpen(false);
+    await logout();
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white/80 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
@@ -81,13 +93,74 @@ export function Header() {
               </span>
             )}
           </Link>
-          <Link
-            to="/login"
-            className="rounded-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-            aria-label="Cuenta"
-          >
-            <User className="h-5 w-5" />
-          </Link>
+          {usuario ? (
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                className="rounded-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                aria-label="Cuenta"
+              >
+                <User className="h-5 w-5" />
+              </button>
+              <AnimatePresence>
+                {menuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-800 dark:bg-neutral-900"
+                  >
+                    <div className="border-b border-neutral-100 px-4 py-3 dark:border-neutral-800">
+                      <p className="truncate text-sm font-medium">
+                        {usuario.nombre} {usuario.apellido}
+                      </p>
+                      <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">{usuario.email}</p>
+                    </div>
+                    <Link
+                      to="/perfil"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    >
+                      <User className="h-4 w-4" /> Mi perfil
+                    </Link>
+                    <Link
+                      to="/pedidos"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    >
+                      <Package className="h-4 w-4" /> Mis pedidos
+                    </Link>
+                    {usuario.rol === 'ADMIN' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      >
+                        <Settings className="h-4 w-4" /> Panel admin
+                      </Link>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-neutral-100 dark:text-red-400 dark:hover:bg-neutral-800"
+                    >
+                      <LogOut className="h-4 w-4" /> Cerrar sesión
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="rounded-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              aria-label="Cuenta"
+            >
+              <User className="h-5 w-5" />
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setMobileOpen((v) => !v)}
