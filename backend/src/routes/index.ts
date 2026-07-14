@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import authRoutes from './auth.routes';
 
 const router = Router();
 
@@ -6,7 +7,9 @@ router.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Los routers de cada módulo (auth, productos, carrito, pedidos...) se montarán aquí
-// a medida que se desarrollen: router.use('/auth', authRouter);
+router.use('/auth', authRoutes);
+
+// Los routers de los siguientes módulos (productos, carrito, pedidos...) se montarán
+// aquí a medida que se desarrollen: router.use('/products', productRoutes);
 
 export default router;

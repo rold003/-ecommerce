@@ -70,8 +70,9 @@ model Usuario {
   pedidos       Pedido[]
   favoritos     Favorito[]
   resenas       Resena[]
-  carrito       Carrito?
-  refreshTokens RefreshToken[]
+  carrito              Carrito?
+  refreshTokens        RefreshToken[]
+  passwordResetTokens  PasswordResetToken[]
 
   @@index([rol])
   @@map("usuarios")
@@ -89,6 +90,20 @@ model RefreshToken {
 
   @@index([usuarioId])
   @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  usuarioId String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usado     Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@map("password_reset_tokens")
 }
 
 model Direccion {
