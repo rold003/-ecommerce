@@ -6,7 +6,6 @@ import { ZodError } from 'zod';
 import { isProduction } from '../config/env';
 import { AppError } from '../utils/AppError';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
   if (err instanceof ZodError) {
     res.status(400).json({

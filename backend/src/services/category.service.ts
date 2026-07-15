@@ -22,7 +22,6 @@ async function generateUniqueSlug(nombre: string, excludeId?: string): Promise<s
   let candidate = base;
   let suffix = 2;
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const existente = await categoryRepository.findBySlugRaw(candidate);
     if (!existente || existente.id === excludeId) return candidate;

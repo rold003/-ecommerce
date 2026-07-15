@@ -28,7 +28,11 @@ export function initAnalytics(): void {
   // ruta (ver trackPageview / useAnalyticsPageview), porque en una SPA el
   // "config" inicial de gtag solo ve la primera carga, no la navegacion
   // interna de React Router.
-  window.gtag('config', measurementId, { send_page_view: false });
+  // debug_mode en desarrollo: hace que los eventos aparezcan al instante en
+  // Admin > DebugView de GA4, que es mas confiable que "Tiempo real" para
+  // confirmar que un evento puntual llego bien (Tiempo real puede tardar
+  // minutos en propagar, DebugView es casi inmediato).
+  window.gtag('config', measurementId, { send_page_view: false, debug_mode: import.meta.env.DEV });
 
   activo = true;
 }
