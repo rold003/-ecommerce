@@ -2,10 +2,12 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
+import { ProductGrid } from '@/components/product/ProductGrid';
+import { useProducts } from '@/hooks/useProducts';
 
-// Hero estático por ahora; el módulo de Catálogo añade productos destacados y
-// categorías reales traídos de la API en esta misma página.
 export default function Home() {
+  const { data, isLoading } = useProducts({ destacado: true, limit: 8 });
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <motion.div
@@ -30,6 +32,19 @@ export default function Home() {
           </Button>
         </Link>
       </motion.div>
+
+      <section className="mt-16">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Productos destacados</h2>
+          <Link
+            to="/catalogo"
+            className="text-sm font-medium text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+          >
+            Ver todo
+          </Link>
+        </div>
+        <ProductGrid productos={data?.items ?? []} loading={isLoading} />
+      </section>
     </div>
   );
 }

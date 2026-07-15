@@ -1,8 +1,9 @@
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Heart, LogOut, Menu, Moon, Package, Search, Settings, ShoppingBag, Sun, User, X } from 'lucide-react';
+import { Heart, LogOut, Menu, Moon, Package, Settings, ShoppingBag, Sun, User, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { SearchAutocomplete } from '@/components/product/SearchAutocomplete';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useClickOutside } from '@/hooks/useClickOutside';
@@ -55,13 +56,8 @@ export function Header() {
         </nav>
 
         <div className="hidden flex-1 items-center md:flex">
-          <div className="relative w-full max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-            <input
-              type="search"
-              placeholder="Buscar productos..."
-              className="h-10 w-full rounded-full border border-neutral-300 bg-neutral-50 pl-9 pr-4 text-sm outline-none transition-colors focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:focus:border-white"
-            />
+          <div className="w-full max-w-sm">
+            <SearchAutocomplete />
           </div>
         </div>
 
@@ -174,13 +170,8 @@ export function Header() {
 
       {mobileOpen && (
         <div className="border-t border-neutral-200 px-4 py-3 md:hidden dark:border-neutral-800">
-          <div className="relative mb-3">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-            <input
-              type="search"
-              placeholder="Buscar productos..."
-              className="h-10 w-full rounded-full border border-neutral-300 bg-neutral-50 pl-9 pr-4 text-sm outline-none dark:border-neutral-700 dark:bg-neutral-900"
-            />
+          <div className="mb-3">
+            <SearchAutocomplete onNavigate={() => setMobileOpen(false)} />
           </div>
           <nav className="flex flex-col gap-1">
             {navLinks.map((link) => (
