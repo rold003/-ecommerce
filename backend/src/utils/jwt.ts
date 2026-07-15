@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
 import type { Rol } from '@prisma/client';
@@ -18,7 +19,11 @@ export function verifyAccessToken(token: string): AccessTokenPayload {
 }
 
 export function signRefreshToken(payload: AccessTokenPayload): string {
-  return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
+  // jti aleatorio: sin esto, dos refresh tokens emitidos para el mismo usuario
+  // dentro del mismo segundo (iat con granularidad de segundos) son
+  // byte-identicos, lo que choca contra la restriccion unique(tokenHash) en
+  // la base de datos y rompe login/register con un 500.
+  return jwt.sign({ ...payload, jti: crypto.randomUUID() }, env.JWT_REFRESH_SECRET, {
     expiresIn: env.JWT_REFRESH_EXPIRES_IN as jwt.SignOptions['expiresIn'],
   });
 }
