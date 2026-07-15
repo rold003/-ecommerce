@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useAddToCart } from '@/hooks/useCart';
 import { useProduct } from '@/hooks/useProducts';
-import { api } from '@/services/api';
 import { formatPrice } from '@/utils/formatPrice';
 import { getErrorMessage } from '@/utils/getErrorMessage';
 
@@ -15,11 +15,11 @@ export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { data: producto, isLoading } = useProduct(slug ?? '');
   const [activeImage, setActiveImage] = useState(0);
-  const [adding, setAdding] = useState(false);
   const { usuario } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const addToCart = useAddToCart();
 
   const handleAddToCart = async (): Promise<void> => {
     if (!producto) return;
@@ -27,14 +27,11 @@ export default function ProductDetail() {
       navigate('/login', { state: { from: location.pathname } });
       return;
     }
-    setAdding(true);
     try {
-      await api.post('/cart/items', { productoId: producto.id, cantidad: 1 });
+      await addToCart.mutateAsync({ productoId: producto.id, cantidad: 1 });
       toast.success('Producto agregado al carrito');
     } catch (err) {
       toast.error(getErrorMessage(err));
-    } finally {
-      setAdding(false);
     }
   };
 
@@ -128,7 +125,13 @@ export default function ProductDetail() {
             )}
           </div>
 
-          <Button size="lg" disabled={producto.stock === 0} loading={adding} onClick={handleAddToCart} fullWidth>
+          <Button
+            size="lg"
+            disabled={producto.stock === 0}
+            loading={addToCart.isPending}
+            onClick={handleAddToCart}
+            fullWidth
+          >
             Agregar al carrito
           </Button>
 

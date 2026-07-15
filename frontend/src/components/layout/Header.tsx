@@ -6,6 +6,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { SearchAutocomplete } from '@/components/product/SearchAutocomplete';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useCart } from '@/hooks/useCart';
 import { useClickOutside } from '@/hooks/useClickOutside';
 
 const navLinks = [
@@ -21,8 +22,8 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   useClickOutside(menuRef, () => setMenuOpen(false));
-  // TODO: se reemplaza por el conteo real del CartContext en el módulo de carrito.
-  const cartCount = 0;
+  const { data: carrito } = useCart();
+  const cartCount = carrito?.items.reduce((acc, item) => acc + item.cantidad, 0) ?? 0;
 
   const handleLogout = async (): Promise<void> => {
     setMenuOpen(false);
