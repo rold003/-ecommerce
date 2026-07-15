@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect, type ReactNode } from 'react';
@@ -8,9 +9,15 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
+  size?: 'md' | 'lg';
 }
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+const sizeClasses = {
+  md: 'max-w-md',
+  lg: 'max-w-2xl',
+};
+
+export function Modal({ open, onClose, title, children, size = 'md' }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent): void => {
@@ -38,7 +45,10 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
           <motion.div
             role="dialog"
             aria-modal="true"
-            className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900"
+            className={clsx(
+              'relative w-full rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900',
+              sizeClasses[size],
+            )}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}

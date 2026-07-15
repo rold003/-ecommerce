@@ -36,3 +36,12 @@ export interface Pedido {
   direccion: Direccion;
   createdAt: string;
 }
+
+export interface PedidoAdmin extends Pedido {
+  usuario: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+  };
+}
