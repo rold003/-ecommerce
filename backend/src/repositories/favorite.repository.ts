@@ -4,7 +4,11 @@ export const favoriteRepository = {
   findAllForUser(usuarioId: string) {
     return prisma.favorito.findMany({
       where: { usuarioId },
-      include: { producto: { include: { imagenes: { orderBy: { orden: 'asc' }, take: 1 } } } },
+      include: {
+        producto: {
+          include: { imagenes: { orderBy: { orden: 'asc' } }, categoria: true, marca: true },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
   },

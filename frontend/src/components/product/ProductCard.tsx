@@ -1,9 +1,21 @@
-import { Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import clsx from 'clsx';
+import { Heart, Star } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import { useAddFavorite, useIsFavorite, useRemoveFavorite } from '@/hooks/useFavorites';
 import type { Producto } from '@/types/product';
 import { formatPrice } from '@/utils/formatPrice';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 
 export function ProductCard({ producto }: { producto: Producto }) {
+  const { usuario } = useAuth();
+  const isFavorite = useIsFavorite(producto.id);
+  const addFavorite = useAddFavorite();
+  const removeFavorite = useRemoveFavorite();
+  const toast = useToast();
+  const navigate = useNavigate();
+
   const imagen = producto.imagenes[0]?.url;
   const tieneDescuento = Boolean(
     producto.precioAnterior && Number(producto.precioAnterior) > Number(producto.precio),
@@ -11,6 +23,24 @@ export function ProductCard({ producto }: { producto: Producto }) {
   const descuentoPct = tieneDescuento
     ? Math.round((1 - Number(producto.precio) / Number(producto.precioAnterior)) * 100)
     : 0;
+
+  const handleToggleFavorite = async (e: React.MouseEvent): Promise<void> => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!usuario) {
+      navigate('/login');
+      return;
+    }
+    try {
+      if (isFavorite) {
+        await removeFavorite.mutateAsync(producto.id);
+      } else {
+        await addFavorite.mutateAsync(producto.id);
+      }
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
 
   return (
     <Link
@@ -31,6 +61,14 @@ export function ProductCard({ producto }: { producto: Producto }) {
             -{descuentoPct}%
           </span>
         )}
+        <button
+          type="button"
+          onClick={handleToggleFavorite}
+          aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+          className="absolute right-3 top-3 rounded-full bg-white/90 p-1.5 shadow-sm transition-colors hover:bg-white dark:bg-neutral-900/90 dark:hover:bg-neutral-900"
+        >
+          <Heart className={clsx('h-4 w-4', isFavorite ? 'fill-red-500 text-red-500' : 'text-neutral-500')} />
+        </button>
         {producto.stock === 0 && (
           <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-sm font-semibold text-white">
             Agotado

@@ -8,9 +8,12 @@ import Cart from '@/pages/Cart';
 import Catalogo from '@/pages/Catalogo';
 import Categorias from '@/pages/Categorias';
 import Checkout from '@/pages/Checkout';
+import Favorites from '@/pages/Favorites';
 import NotFound from '@/pages/NotFound';
 import OrderDetail from '@/pages/OrderDetail';
+import Orders from '@/pages/Orders';
 import ProductDetail from '@/pages/ProductDetail';
+import Profile from '@/pages/Profile';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 
 function App() {
@@ -41,10 +44,34 @@ function App() {
           }
         />
         <Route
+          path="pedidos"
+          element={
+            <ProtectedRoute>
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="pedidos/:id"
           element={
             <ProtectedRoute>
               <OrderDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="perfil"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="favoritos"
+          element={
+            <ProtectedRoute>
+              <Favorites />
             </ProtectedRoute>
           }
         />

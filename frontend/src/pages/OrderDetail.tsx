@@ -1,10 +1,17 @@
 import { CheckCircle2, Clock, Package, Truck, XCircle, type LucideIcon } from 'lucide-react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Spinner } from '@/components/ui/Spinner';
-import { useOrder } from '@/hooks/useOrders';
+import { useToast } from '@/context/ToastContext';
+import { useCancelOrder, useOrder } from '@/hooks/useOrders';
 import type { EstadoPedido } from '@/types/order';
 import { formatPrice } from '@/utils/formatPrice';
+import { getErrorMessage } from '@/utils/getErrorMessage';
+
+const CANCELABLE_STATES: EstadoPedido[] = ['PENDIENTE', 'PAGADO'];
 
 type BadgeVariant = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 
@@ -19,6 +26,20 @@ const ESTADO_CONFIG: Record<EstadoPedido, { label: string; variant: BadgeVariant
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: pedido, isLoading } = useOrder(id ?? '');
+  const cancelOrder = useCancelOrder();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const toast = useToast();
+
+  const handleCancel = async (): Promise<void> => {
+    if (!id) return;
+    try {
+      await cancelOrder.mutateAsync(id);
+      toast.success('Pedido cancelado');
+      setShowCancelDialog(false);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
 
   if (isLoading) {
     return (
@@ -100,6 +121,26 @@ export default function OrderDetail() {
           {pedido.direccion.ciudad}, {pedido.direccion.provincia}
         </p>
       </div>
+
+      {CANCELABLE_STATES.includes(pedido.estado) && (
+        <div className="mt-6 flex justify-end">
+          <Button variant="danger" onClick={() => setShowCancelDialog(true)}>
+            Cancelar pedido
+          </Button>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={showCancelDialog}
+        title="Cancelar pedido"
+        description="Esta acción restituirá el stock de los productos. ¿Seguro que quieres cancelar este pedido?"
+        variant="danger"
+        confirmLabel="Sí, cancelar"
+        cancelLabel="Volver"
+        onConfirm={handleCancel}
+        onCancel={() => setShowCancelDialog(false)}
+        loading={cancelOrder.isPending}
+      />
     </div>
   );
 }
