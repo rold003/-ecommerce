@@ -8,6 +8,7 @@ import { FilterSidebar } from '@/components/product/FilterSidebar';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { useBrands } from '@/hooks/useBrands';
 import { useCategories } from '@/hooks/useCategories';
+import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useProducts } from '@/hooks/useProducts';
 
 const SORT_OPTIONS = [
@@ -19,6 +20,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function Catalogo() {
+  useDocumentMeta('Catálogo', 'Explora todo el catálogo: tecnología, moda y hogar con filtros por categoría, marca y precio.');
   const [searchParams, setSearchParams] = useSearchParams();
 
   const filters = useMemo(

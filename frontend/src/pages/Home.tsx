@@ -3,10 +3,12 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { ProductGrid } from '@/components/product/ProductGrid';
+import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useProducts } from '@/hooks/useProducts';
 
 export default function Home() {
   const { data, isLoading } = useProducts({ destacado: true, limit: 8 });
+  useDocumentMeta('Inicio', 'Tecnología, moda y hogar con envío rápido y garantía en cada compra.');
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

@@ -12,6 +12,7 @@ import { errorHandler } from './middlewares/errorHandler';
 import { notFound } from './middlewares/notFound';
 import { apiLimiter } from './middlewares/rateLimiter';
 import routes from './routes';
+import { sitemapService } from './services/sitemap.service';
 
 export function createApp(): Application {
   const app = express();
@@ -34,6 +35,15 @@ export function createApp(): Application {
   app.use(express.urlencoded({ extended: true, limit: '10kb' }));
   app.use(cookieParser());
   app.use(morgan(isProduction ? 'combined' : 'dev'));
+
+  app.get('/sitemap.xml', async (_req, res, next) => {
+    try {
+      const xml = await sitemapService.build();
+      res.type('application/xml').send(xml);
+    } catch (err) {
+      next(err);
+    }
+  });
 
   app.use('/api', apiLimiter);
   app.use('/api/v1', routes);

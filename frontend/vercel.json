@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://tu-backend.onrender.com/sitemap.xml"
+    }
+  ]
+}

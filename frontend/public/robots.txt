@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /perfil
+Disallow: /pedidos
+Disallow: /carrito
+Disallow: /checkout
+Disallow: /favoritos
+
+# Reemplazar por el dominio real antes de publicar.
+Sitemap: https://tu-dominio.com/sitemap.xml
