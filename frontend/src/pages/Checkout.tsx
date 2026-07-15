@@ -1,13 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AddressForm } from '@/components/checkout/AddressForm';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 import { Spinner } from '@/components/ui/Spinner';
+import { trackEvent, type AnalyticsItem } from '@/config/analytics';
 import { useToast } from '@/context/ToastContext';
 import { useAddresses, useCreateAddress } from '@/hooks/useAddresses';
 import { useCart } from '@/hooks/useCart';
@@ -38,6 +39,25 @@ export default function Checkout() {
   const direccionActiva =
     selectedAddressId ?? direcciones?.find((d) => d.predeterminada)?.id ?? direcciones?.[0]?.id;
 
+  const cartItemsToAnalytics = (): AnalyticsItem[] =>
+    (carrito?.items ?? []).map((item) => ({
+      item_id: item.producto.id,
+      item_name: item.producto.nombre,
+      price: Number(item.producto.precio),
+      quantity: item.cantidad,
+    }));
+
+  // Se dispara una sola vez al llegar al checkout con items (no en cada
+  // re-render), aunque React Query vuelva a resolver la misma query.
+  const beginCheckoutEnviado = useRef(false);
+  useEffect(() => {
+    if (beginCheckoutEnviado.current) return;
+    if (!carrito || carrito.items.length === 0) return;
+    beginCheckoutEnviado.current = true;
+    trackEvent('begin_checkout', { currency: 'USD', value: carrito.total, items: cartItemsToAnalytics() });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [carrito]);
+
   const handleCreateAddress = async (values: AddressFormValues): Promise<void> => {
     try {
       const nueva = await createAddress.mutateAsync(values);
@@ -57,6 +77,14 @@ export default function Checkout() {
     setSubmitting(true);
     try {
       const pedido = await orderService.checkout({ direccionId: direccionActiva, metodoPago });
+      trackEvent('purchase', {
+        transaction_id: pedido.numero,
+        currency: 'USD',
+        value: Number(pedido.total),
+        shipping: carrito ? Number(carrito.envio) : undefined,
+        tax: carrito ? Number(carrito.iva) : undefined,
+        items: cartItemsToAnalytics(),
+      });
       toast.success('Pedido realizado correctamente');
       navigate(`/pedidos/${pedido.id}`, { replace: true });
       // Se invalida después de navegar (sin await) para no disparar, mientras el

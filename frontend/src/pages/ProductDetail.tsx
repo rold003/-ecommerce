@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { trackEvent } from '@/config/analytics';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useAddToCart } from '@/hooks/useCart';
+import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useProduct } from '@/hooks/useProducts';
 import { formatPrice } from '@/utils/formatPrice';
 import { getErrorMessage } from '@/utils/getErrorMessage';
@@ -14,6 +16,7 @@ import { getErrorMessage } from '@/utils/getErrorMessage';
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { data: producto, isLoading } = useProduct(slug ?? '');
+  useDocumentMeta(producto?.nombre ?? 'Producto', producto?.descripcion);
   const [activeImage, setActiveImage] = useState(0);
   const { usuario } = useAuth();
   const toast = useToast();
@@ -29,6 +32,11 @@ export default function ProductDetail() {
     }
     try {
       await addToCart.mutateAsync({ productoId: producto.id, cantidad: 1 });
+      trackEvent('add_to_cart', {
+        currency: 'USD',
+        value: Number(producto.precio),
+        items: [{ item_id: producto.id, item_name: producto.nombre, price: Number(producto.precio), quantity: 1 }],
+      });
       toast.success('Producto agregado al carrito');
     } catch (err) {
       toast.error(getErrorMessage(err));

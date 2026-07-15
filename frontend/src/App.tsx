@@ -18,14 +18,20 @@ import Catalogo from '@/pages/Catalogo';
 import Categorias from '@/pages/Categorias';
 import Checkout from '@/pages/Checkout';
 import Favorites from '@/pages/Favorites';
+import Devoluciones from '@/pages/legal/Devoluciones';
+import Privacidad from '@/pages/legal/Privacidad';
+import Terminos from '@/pages/legal/Terminos';
 import NotFound from '@/pages/NotFound';
 import OrderDetail from '@/pages/OrderDetail';
 import Orders from '@/pages/Orders';
 import ProductDetail from '@/pages/ProductDetail';
 import Profile from '@/pages/Profile';
 import { AdminRoute, ProtectedRoute } from '@/routes/ProtectedRoute';
+import { useAnalyticsPageview } from '@/hooks/useAnalyticsPageview';
 
 function App() {
+  useAnalyticsPageview();
+
   return (
     <Routes>
       <Route element={<Layout />}>
@@ -36,6 +42,9 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="registro" element={<Register />} />
         <Route path="recuperar-password" element={<RecuperarPassword />} />
+        <Route path="terminos" element={<Terminos />} />
+        <Route path="privacidad" element={<Privacidad />} />
+        <Route path="devoluciones" element={<Devoluciones />} />
         <Route
           path="carrito"
           element={

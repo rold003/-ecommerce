@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
+import * as Sentry from '@sentry/node';
 import multer from 'multer';
 import { ZodError } from 'zod';
 import { isProduction } from '../config/env';
@@ -46,6 +47,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   }
 
   console.error(err);
+  Sentry.captureException(err); // solo errores no manejados (500) llegan aca; los 4xx esperados no gastan cuota de Sentry
   res.status(500).json({
     status: 'error',
     message: isProduction ? 'Error interno del servidor' : (err as Error).message,

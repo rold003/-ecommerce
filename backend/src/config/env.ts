@@ -28,6 +28,10 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000),
   RATE_LIMIT_MAX: z.coerce.number().default(100),
 
+  // Monitoreo de errores (opcional; sin esto, Sentry.init nunca se llama y
+  // captureException queda como no-op — ver src/config/sentry.ts).
+  SENTRY_DSN: z.string().optional(),
+
   TAX_RATE: z.coerce.number().min(0).max(1).default(0.15),
   SHIPPING_FLAT_RATE: z.coerce.number().nonnegative().default(5),
   FREE_SHIPPING_THRESHOLD: z.coerce.number().nonnegative().default(50),

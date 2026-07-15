@@ -3,10 +3,15 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { initAnalytics } from './config/analytics';
+import { initSentry } from './config/sentry';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import './styles/index.css';
+
+initSentry();
+initAnalytics();
 
 const queryClient = new QueryClient({
   defaultOptions: {

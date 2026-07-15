@@ -27,9 +27,11 @@ con modo oscuro/claro.
 - [Variables de entorno](#variables-de-entorno)
 - [Prisma y migraciones](#prisma-y-migraciones)
 - [Scripts disponibles](#scripts-disponibles)
+- [Tests](#tests)
 - [Documentación de la API](#documentación-de-la-api)
 - [Cuentas de prueba (seed)](#cuentas-de-prueba-seed)
 - [Despliegue](#despliegue)
+- [SEO y observabilidad](#seo-y-observabilidad)
 - [Seguridad](#seguridad)
 
 ## Tecnologías
@@ -178,12 +180,15 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 | `TAX_RATE` | Tasa de IVA aplicada en carrito/checkout | `0.15` |
 | `SHIPPING_FLAT_RATE` | Costo de envío plano | `5` |
 | `FREE_SHIPPING_THRESHOLD` | Monto desde el cual el envío es gratis | `50` |
+| `SENTRY_DSN` | DSN de Sentry (opcional; sin él, Sentry no se activa) | — |
 
 ### `frontend/.env`
 
 | Variable | Descripción | Default |
 |---|---|---|
 | `VITE_API_URL` | URL base de la API del backend | `http://localhost:4000/api/v1` |
+| `VITE_SENTRY_DSN` | DSN de Sentry (opcional; sin él, Sentry no se activa) | — |
+| `VITE_GA_MEASUREMENT_ID` | Measurement ID de Google Analytics 4 (opcional; sin él, GA4 no se activa) | — |
 
 ## Prisma y migraciones
 
@@ -220,6 +225,8 @@ El schema define 15 modelos normalizados: `Usuario`, `RefreshToken`,
 | `npm run build` | Compila TypeScript a `dist/` |
 | `npm start` | Arranca el build de producción |
 | `npm run lint` | ESLint |
+| `npm test` | Corre los tests (crea/sincroniza `ecommerce_test` y luego corre Vitest) |
+| `npm run test:watch` | Tests en modo watch |
 
 ### `frontend/`
 
@@ -229,6 +236,29 @@ El schema define 15 modelos normalizados: `Usuario`, `RefreshToken`,
 | `npm run build` | Type-check + build de producción |
 | `npm run preview` | Sirve el build de producción localmente |
 | `npm run lint` | ESLint |
+
+## Tests
+
+```bash
+cd backend
+npm test          # una sola corrida
+npm run test:watch
+```
+
+Cubre lo más crítico del negocio (no hay tests de UI todavía):
+
+- **`tests/unit/pricing.service.test.ts`**: cálculo de IVA, envío y descuentos — funciones
+  puras, sin base de datos.
+- **`tests/integration/auth.service.test.ts`**: registro, login, credenciales inválidas,
+  usuario desactivado.
+- **`tests/integration/order.service.test.ts`**: checkout — descuento atómico de stock,
+  bloqueo de sobreventa, productos inactivos, carrito vacío, direcciones ajenas.
+
+Los tests de integración corren contra una base de datos Postgres **real** (no mocks), en
+`ecommerce_test` — la misma instancia de Docker del desarrollo local, pero una base
+separada para no tocar los datos de desarrollo/seed. El script `pretest` (`prisma db
+push`) la crea/sincroniza automáticamente antes de cada corrida; no hace falta preparación
+manual más allá de tener `npm run db:up` levantado.
 
 ## Documentación de la API
 
@@ -272,8 +302,13 @@ El seed también crea 4 categorías, 4 marcas, 8 productos con imágenes y el cu
 
 1. Importar el repositorio, con **Root Directory** = `frontend/`.
 2. Build command: `npm run build` — Output directory: `dist/`.
-3. Variable de entorno: `VITE_API_URL` apuntando a la URL del backend en Render
-   (ej. `https://tu-backend.onrender.com/api/v1`).
+3. Variables de entorno: `VITE_API_URL` apuntando a la URL del backend en Render
+   (ej. `https://tu-backend.onrender.com/api/v1`), y opcionalmente `VITE_SENTRY_DSN` /
+   `VITE_GA_MEASUREMENT_ID`.
+4. Actualizar `frontend/vercel.json` con la URL real del backend en Render (reemplaza
+   `https://tu-backend.onrender.com`) — redirige `/sitemap.xml` al backend, que es quien
+   genera el sitemap dinámicamente. También reemplazar el dominio placeholder en
+   `frontend/public/robots.txt`.
 
 ### Cloudinary y SMTP (opcional)
 
@@ -281,6 +316,29 @@ Sin estas credenciales, la subida de imágenes responde `503` (el admin puede pe
 URLs directas) y los correos se imprimen en el log del servidor en vez de enviarse.
 Para habilitarlos en producción, configura `CLOUDINARY_*` y `SMTP_*` con credenciales
 reales.
+
+## SEO y observabilidad
+
+- **`GET /sitemap.xml`** (backend): generado en cada request a partir de los productos
+  activos y las páginas estáticas — no hay que regenerarlo a mano al agregar productos.
+  Las categorías no tienen URL propia (se filtran por query param en `/catalogo`), así
+  que no aparecen como entradas separadas.
+- **`frontend/public/robots.txt`**: permite todo salvo las páginas privadas
+  (`/admin`, `/perfil`, `/pedidos`, `/carrito`, `/checkout`, `/favoritos`).
+- **`<title>`/meta description por página**: `useDocumentMeta` (sin dependencias nuevas)
+  actualiza el título y la descripción al navegar — ayuda a Google (que sí ejecuta JS),
+  pero **no** genera vistas previas para compartir en redes (WhatsApp/Facebook/Twitter no
+  ejecutan JS): eso requeriría SSR/prerender, que esta SPA no tiene.
+- **Sentry** (`@sentry/node` en el backend, `@sentry/react` en el frontend): opcional,
+  desactivado por completo si `SENTRY_DSN`/`VITE_SENTRY_DSN` no están configurados. En el
+  backend solo se reportan errores 500 no manejados (`errorHandler.ts`), nunca errores
+  esperables como 400/404/409 — así no se gasta la cuota gratuita en ruido.
+- **Google Analytics 4** (`frontend/src/config/analytics.ts`): opcional, desactivado por
+  completo si `VITE_GA_MEASUREMENT_ID` no está configurado (el script de Google ni
+  siquiera se carga). Trackea vistas de página en cada cambio de ruta (SPA, no recarga
+  completa) y el embudo de conversión de e-commerce: `add_to_cart` (ProductDetail),
+  `begin_checkout` y `purchase` (Checkout) — con `items`/`value`/`currency` en el formato
+  que espera GA4 para sus reportes de e-commerce.
 
 ## Seguridad
 
