@@ -127,7 +127,7 @@ ecommerce/
 
 ```bash
 # 1. Clonar el repositorio
-git clone <url-del-repositorio>
+git clone https://github.com/rold003/-ecommerce.git
 cd ecommerce
 
 # 2. Levantar PostgreSQL local
