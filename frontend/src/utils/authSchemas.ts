@@ -20,6 +20,7 @@ export const registerSchema = z
     email: z.string().trim().email('Correo inválido'),
     password: passwordSchema,
     confirmPassword: z.string(),
+    aceptaTerminos: z.literal(true, { message: 'Debes aceptar los Términos y la Política de Privacidad' }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',

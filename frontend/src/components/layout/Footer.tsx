@@ -53,14 +53,37 @@ export function Footer() {
         <div>
           <h4 className="text-sm font-semibold">Ayuda</h4>
           <ul className="mt-3 space-y-2 text-sm text-neutral-500 dark:text-neutral-400">
-            <li>Envíos y devoluciones</li>
-            <li>Preguntas frecuentes</li>
-            <li>Contacto</li>
+            <li>
+              <Link to="/devoluciones" className="hover:text-neutral-900 dark:hover:text-white">
+                Envíos y devoluciones
+              </Link>
+            </li>
+            <li>
+              <Link to="/terminos" className="hover:text-neutral-900 dark:hover:text-white">
+                Términos y condiciones
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacidad" className="hover:text-neutral-900 dark:hover:text-white">
+                Política de privacidad
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
-      <div className="border-t border-neutral-200 py-4 text-center text-xs text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
-        © {new Date().getFullYear()} Tienda Online. Todos los derechos reservados.
+      <div className="flex flex-col items-center gap-2 border-t border-neutral-200 py-4 text-center text-xs text-neutral-500 dark:border-neutral-800 dark:text-neutral-400 sm:flex-row sm:justify-between sm:px-6 lg:px-8">
+        <p>© {new Date().getFullYear()} Tienda Online. Todos los derechos reservados.</p>
+        <div className="flex gap-4">
+          <Link to="/terminos" className="hover:text-neutral-900 dark:hover:text-white">
+            Términos
+          </Link>
+          <Link to="/privacidad" className="hover:text-neutral-900 dark:hover:text-white">
+            Privacidad
+          </Link>
+          <Link to="/devoluciones" className="hover:text-neutral-900 dark:hover:text-white">
+            Devoluciones
+          </Link>
+        </div>
       </div>
     </footer>
   );

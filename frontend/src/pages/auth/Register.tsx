@@ -79,6 +79,28 @@ export default function Register() {
           error={errors.confirmPassword?.message}
           {...register('confirmPassword')}
         />
+        <div>
+          <label className="flex items-start gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 rounded border-neutral-300 dark:border-neutral-700"
+              {...register('aceptaTerminos')}
+            />
+            <span>
+              Acepto los{' '}
+              <Link to="/terminos" target="_blank" className="underline hover:text-neutral-900 dark:hover:text-white">
+                Términos y Condiciones
+              </Link>{' '}
+              y la{' '}
+              <Link to="/privacidad" target="_blank" className="underline hover:text-neutral-900 dark:hover:text-white">
+                Política de Privacidad
+              </Link>
+            </span>
+          </label>
+          {errors.aceptaTerminos && (
+            <p className="mt-1 text-xs text-red-500">{errors.aceptaTerminos.message}</p>
+          )}
+        </div>
         <Button type="submit" fullWidth loading={submitting}>
           Crear cuenta
         </Button>
